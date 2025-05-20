@@ -34,10 +34,22 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 
 ## Data Ingestion
 
-- **Lambda Function:** Periodically fetches NBA Playoffs data from the Balldontlie API (both historical and daily).
-- **Kinesis Data Firehose:** Streams data into S3 raw zone in near real-time.
-- **EventBridge:** Schedules Lambda execution (e.g., daily after games finish).
-- **S3 Bucket:** Stores all ingested raw data in partitioned folders for downstream processing.
+- **Historical Backfill Lambda:**  
+  Extracts all NBA Playoffs player stats from 1995 up to the most current day. The data is saved as a bulk historical dataset in the S3 bucket:  
+  - `nba-playoffs-historical-bucket`
+
+- **Daily Ingestion Lambda:**  
+  Runs automatically each day during the NBA Playoffs. If there are games on that day, it fetches the player stats and sends the data into Kinesis Data Firehose, which then delivers the records to the S3 bucket:  
+  - `nba-playoffs-daily-stats-bucket`
+
+- **Kinesis Data Firehose:**  
+  Handles real-time streaming and delivery of daily stats from the Lambda function to S3.
+
+- **EventBridge:**  
+  Schedules and triggers the daily Lambda function to ensure data is ingested only when new games are played.
+
+- **S3 Buckets:**  
+  Act as the raw data landing zones for both historical and daily NBA Playoffs stats, partitioned and organized for downstream processing.
 
 ---
 
