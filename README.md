@@ -78,13 +78,13 @@ This project utilizes an automated, event-driven ETL pipeline to process NBA Pla
 2. **Crawl Raw Data:**  
    - **Glue Crawler** scans the bucket, cataloging new files and updating the Glue Data Catalog with any new schema changes.
 3. **Delete Staging Table:**  
-   - Existing staging tables and their data are dropped to ensure that only the new batch (previous 24 hours) is processed in the next steps.
+   - Existing staging tables and their data in the S3 bucket are dropped to ensure that only the new batch (previous 24 hours) is processed in the next steps.
 4. **Create Staging Table:**  
    - New data from the daily raw bucket is loaded and transformed into a staging Parquet table, ready for validation.
 5. **Data Quality Checks:**  
    - Automated scripts run data quality (DQ) checks on the new staging table, validating fields like player name, team abbreviation, game date, and points to ensure there are no missing, null, or duplicated values.
 6. **Publish to Prod Table:**  
-   - If all data quality checks pass, the new batch of daily data is **appended** to the production Parquet table (`prod` table).
+   - If all data quality checks pass, the new batch of daily data is **appended** to the production Parquet table (`final_nba_playoffs_data_parquet_tbl_prod` table).
 7. **Workflow Monitoring:**  
    - Each job step is monitored via AWS CloudWatch and Glue triggers. If a step fails, subsequent steps do not run.
 
@@ -94,9 +94,35 @@ This event-driven ETL architecture ensures timely, reliable, and scalable proces
 
 ## Analysis & Observations
 
-- Automated end-to-end pipeline: new data flows from API to dashboard with no manual intervention.
-- Incremental "staging → prod" table design ensures no data is reprocessed, supporting daily updates at scale.
-- Data quality is maintained with ETL checks (NULLs, invalid types, duplicates).
+### Key Insights from 30 Years of NBA Playoffs Data (1995–2025)
+![Average Score Per Game Trend Analysis](./Grafana_Visualizations/Overview_Page_1.png)
+#### 📈 Long-Term Scoring Trends
+- **Rising Points per Game:**
+  Over the last 30 years, the average points scored per game in the NBA Playoffs has noticeably increased.
+- **Three-Point Revolution:**  
+  The main driver appears to be the increased number of 3-point attempts per game, as indicated by the strong correlation between `avg_fg3a` (average 3-pointers attempted) and `avg_game_score` in the visualizations.
+- **Free Throw Attempts:**  
+  No significant trend or relationship was observed between free throw attempts and average game score. Contrary to some expectations, selling fouls (“drawing fouls”) has **not** increased on average — the number of fouls per season has remained quite stable.
+
+![Playoffs Leaders](./Grafana_Visualizations/Overview_Page_2.png)
+#### 🏆 Playoff Legends & Player Achievements
+- **Playoff Appearance Leaders:**  
+  Tim Duncan leads the NBA Playoffs in total appearances (202), followed by Shaquille O’Neal, Udonis Haslem, Kendrick Perkins, and Al Horford. Their longevity and consistency highlight both personal excellence and team success.
+- **All-Around Greatness:**  
+  LeBron James stands out as the all-time Playoff leader in points and assists, and ranks second in rebounds over the past 30 years. His ability to contribute across all facets of the game is unmatched.
+
+![Daily Game Analysis](./Grafana_Visualizations/Game_Analysis_Page.png)
+#### 🔎 Daily Game Analysis
+- **Real-Time Insights:**  
+  The dashboard provides daily breakdowns of the most recent games, showing top performers for points, rebounds, and assists, along with full box scores for every player. Team scores and results (as seen in the daily panel) let users instantly identify the winner of each playoff game.
+
+#### 📊 Further Observations & Thoughts
+- **Assists and Team Success:**  
+  High-assist players like Jason Kidd, Chris Paul, and Tony Parker consistently appear among leaders, suggesting the importance of playmaking in playoff success.
+- **No Single-Factor Dominance:**  
+  While 3-point shooting is a clear factor in rising scores, there is no evidence that any single metric (e.g., free throws, fouls) alone explains team success or changing trends.
+- **Era Evolution:**  
+  The visual uptick in scoring and shot attempts post-2015 matches the NBA’s well-documented shift toward pace-and-space, emphasizing 3-point shooting and faster offense.
 
 ---
 
@@ -111,32 +137,27 @@ This event-driven ETL architecture ensures timely, reliable, and scalable proces
 ## Design Considerations
 
 - **Event-driven, serverless:** Entire pipeline scales with data volume, no servers to manage.
-- **IAM Security:** Roles limited by least privilege for Lambda, Firehose, Glue, Athena.
+- **IAM Security:** Roles limited by least privilege for Lambda, S3, Firehose, Glue, Athena.
 - **Partitioning:** Year/month partitions optimize Athena cost/performance.
-- **Incremental Loads:** New daily snapshots processed without re-ingesting history.
+- **Incremental Loads:** New daily snapshots processed without re-ingesting history data every time.
 
 ---
 
 ## Future Improvements
 
-- Add NBA regular season data and combine with playoffs.
-- Enhance data quality rules (e.g., fuzzy matching for player names).
-- Build more advanced analytics (e.g., win prediction, player impact scores).
-- Automate dashboard updates and add email/SNS alerts for failed pipeline steps.
-- Add CI/CD for deployment (e.g., using AWS CDK or Terraform).
-- Package pipeline for easy deployment (CloudFormation, SAM, etc).
-
----
-
-## Getting Started
-
-1. Clone this repo.
-2. Review the Lambda, Glue job, and SQL scripts.
-3. Deploy architecture in your AWS account using included IaC files (coming soon).
-4. Connect Grafana to Athena, run provided queries for your dashboards.
-
----
-
-## Contact
-
-Questions? Contact [Your Name] | [Your LinkedIn] | [Your Email]
+- **Incorporate NBA Regular Season Data:**  
+  Extend the pipeline to ingest and analyze both regular season and playoffs data for a more holistic view of team and player performance.
+- **Dimensional Modeling:**  
+  Implement dimensional modeling by introducing more dimension tables (e.g., teams, players, games, seasons) and optimizing schema normalization to improve query performance and analytical flexibility.
+- **Enhanced Data Quality Checks:**  
+  Expand data validation rules—such as referential integrity checks, range validations, and checks for duplicate records—to further guarantee data reliability and consistency throughout the pipeline.
+- **Advanced Analytics:**  
+  Develop new features such as win prediction models, player impact scores, and advanced player/team rankings.
+- **Orchestration Flexibility:**  
+  Experiment with different orchestration tools (e.g., Apache Airflow, AWS Step Functions) to further automate and optimize ETL workflows.
+- **Automated Dashboard Updates and Monitoring:**  
+  Automate dashboard refreshes and add email or SNS alerts for pipeline failures or anomalies.
+- **CI/CD Integration:**  
+  Integrate continuous integration/continuous deployment practices using tools like AWS CDK or Terraform for seamless deployment and versioning.
+- **Pipeline Packaging:**  
+  Package the entire solution for easy deployment and reuse (e.g., AWS CloudFormation, AWS SAM, or Docker).
