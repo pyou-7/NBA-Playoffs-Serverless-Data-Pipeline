@@ -19,7 +19,7 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 
 ## Architecture Overview
 
-![Project Architecture Diagram](./PATH_TO_YOUR_DIAGRAM.png)
+![Project Architecture Diagram](./AWS_Architecture/AWS_Architecture.png)
 
 **Key AWS Services:**
 - **API Source:** [Balldontlie NBA API](https://www.balldontlie.io/)
