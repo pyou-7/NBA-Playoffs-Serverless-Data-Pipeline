@@ -145,19 +145,11 @@ This event-driven ETL architecture ensures timely, reliable, and scalable proces
 
 ## Future Improvements
 
-- **Incorporate NBA Regular Season Data:**  
-  Extend the pipeline to ingest and analyze both regular season and playoffs data for a more holistic view of team and player performance.
-- **Dimensional Modeling:**  
-  Implement dimensional modeling by introducing more dimension tables (e.g., teams, players, games, seasons) and optimizing schema normalization to improve query performance and analytical flexibility.
-- **Enhanced Data Quality Checks:**  
-  Expand data validation rules—such as referential integrity checks, range validations, and checks for duplicate records—to further guarantee data reliability and consistency throughout the pipeline.
-- **Advanced Analytics:**  
-  Develop new features such as win prediction models, player impact scores, and advanced player/team rankings.
-- **Orchestration Flexibility:**  
-  Experiment with different orchestration tools (e.g., Apache Airflow, AWS Step Functions) to further automate and optimize ETL workflows.
-- **Automated Dashboard Updates and Monitoring:**  
-  Automate dashboard refreshes and add email or SNS alerts for pipeline failures or anomalies.
-- **CI/CD Integration:**  
-  Integrate continuous integration/continuous deployment practices using tools like AWS CDK or Terraform for seamless deployment and versioning.
-- **Pipeline Packaging:**  
-  Package the entire solution for easy deployment and reuse (e.g., AWS CloudFormation, AWS SAM, or Docker).
+- **Incorporate NBA Regular Season Data:** Extend the pipeline to ingest and analyze both regular season and playoffs data for a more holistic view of team and player performance.
+- **Dimensional Modeling:** Implement dimensional modeling by introducing more dimension tables (e.g., teams, players, games, seasons) and optimizing schema normalization to improve query performance and analytical flexibility.
+- **Enhanced Data Quality Checks:** Expand data validation rules—such as referential integrity checks, range validations, and checks for duplicate records—to further guarantee data reliability and consistency throughout the pipeline.
+- **Advanced Analytics:** Develop new features such as win prediction models, player impact scores, and advanced player/team rankings.
+- **Orchestration Flexibility:** Experiment with different orchestration tools (e.g., Apache Airflow, AWS Step Functions) to further automate and optimize ETL workflows.
+- **Automated Dashboard Updates and Monitoring:** Automate dashboard refreshes and add email or SNS alerts for pipeline failures or anomalies.
+- **CI/CD Integration:** Integrate continuous integration/continuous deployment practices using tools like AWS CDK or Terraform for seamless deployment and versioning.
+- **Pipeline Packaging:** Package the entire solution for easy deployment and reuse (e.g., AWS CloudFormation, AWS SAM, or Docker).
