@@ -70,7 +70,7 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 ---
 
 ## Event-Driven ETL Workflow Orchestration
-
+![Workflow Architecture Diagram](./Pipeline_Architecture/Pipeline_Workflow.png)
 This project utilizes an automated, event-driven ETL pipeline to process NBA Playoffs player stats as soon as new daily data lands in the `nba-playoffs-daily-stats-bucket` S3 bucket. The workflow is orchestrated using AWS Glue workflows and consists of the following sequence:
 
 1. **Trigger:**  
