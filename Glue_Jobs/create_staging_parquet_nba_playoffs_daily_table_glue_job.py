@@ -55,7 +55,7 @@ queryStart = client.start_query_execution(
     WHERE 
     "team.conference" IN ('West', 'East')
     AND
-    CAST("game.date" AS timestamp) >= current_timestamp - interval '2' day
+    CAST("game.date" AS timestamp) >= current_timestamp - interval '1' day
     ;
     """,
     
