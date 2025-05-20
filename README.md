@@ -10,6 +10,7 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 - [Data Ingestion](#data-ingestion)
 - [Data Transformation](#data-transformation)
 - [Data Visualization](#data-visualization)
+- [Event-Driven ETL Workflow Orchestration](#Event-Driven-ETL-Workflow-Orchestration)
 - [Analysis & Observations](#analysis--observations)
 - [Troubleshooting & Testing](#troubleshooting--testing)
 - [Design Considerations](#design-considerations)
@@ -37,17 +38,13 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 - **Historical Backfill Lambda:**  
   Extracts all NBA Playoffs player stats from 1995 up to the most current day. The data is saved as a bulk historical dataset in the S3 bucket:  
   - `nba-playoffs-historical-bucket`
-
 - **Daily Ingestion Lambda:**  
   Runs automatically each day during the NBA Playoffs. If there are games on that day, it fetches the player stats and sends the data into Kinesis Data Firehose, which then delivers the records to the S3 bucket:  
   - `nba-playoffs-daily-stats-bucket`
-
 - **Kinesis Data Firehose:**  
   Handles real-time streaming and delivery of daily stats from the Lambda function to S3.
-
 - **EventBridge:**  
   Schedules and triggers the daily Lambda function to ensure data is ingested only when new games are played.
-
 - **S3 Buckets:**  
   Act as the raw data landing zones for both historical and daily NBA Playoffs stats, partitioned and organized for downstream processing.
 
@@ -56,7 +53,7 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 ## Data Transformation
 
 - **Glue Crawlers:** Detect and catalog new raw data files in S3, updating the Athena schema.
-- **Glue Jobs:** Python/Spark ETL jobs:
+- **Glue Jobs:** Python ETL jobs:
   - Clean, normalize, and transform raw API JSON to flat, analytics-ready tables (Parquet format).
   - Partition by year/month for efficient querying.
   - Implement data quality checks (e.g., NULL checks, type casts).
@@ -68,7 +65,30 @@ This project implements a **serverless data engineering pipeline** on AWS, inges
 ## Data Visualization
 
 - **Athena:** Query and analyze cleaned NBA stats (player, team, game metrics).
-- **Grafana:** Visualize key metrics—e.g., team scoring trends, player performance, conference comparisons—using Athena as a data source.
+- **Grafana:** Visualize key metrics—e.g., team scoring trends, player performance, conference comparisons - using Athena as a data source.
+
+---
+
+## Event-Driven ETL Workflow Orchestration
+
+This project utilizes an automated, event-driven ETL pipeline to process NBA Playoffs player stats as soon as new daily data lands in the `nba-playoffs-daily-stats-bucket` S3 bucket. The workflow is orchestrated using AWS Glue workflows and consists of the following sequence:
+
+1. **Trigger:**  
+   The workflow is triggered automatically whenever new files are created in the `nba-playoffs-daily-stats-bucket` (via Kinesis Firehose after Lambda ingestion).
+2. **Crawl Raw Data:**  
+   - **Glue Crawler** scans the bucket, cataloging new files and updating the Glue Data Catalog with any new schema changes.
+3. **Delete Staging Table:**  
+   - Existing staging tables and their data are dropped to ensure that only the new batch (previous 24 hours) is processed in the next steps.
+4. **Create Staging Table:**  
+   - New data from the daily raw bucket is loaded and transformed into a staging Parquet table, ready for validation.
+5. **Data Quality Checks:**  
+   - Automated scripts run data quality (DQ) checks on the new staging table, validating fields like player name, team abbreviation, game date, and points to ensure there are no missing, null, or duplicated values.
+6. **Publish to Prod Table:**  
+   - If all data quality checks pass, the new batch of daily data is **appended** to the production Parquet table (`prod` table).
+7. **Workflow Monitoring:**  
+   - Each job step is monitored via AWS CloudWatch and Glue triggers. If a step fails, subsequent steps do not run.
+
+This event-driven ETL architecture ensures timely, reliable, and scalable processing of NBA Playoffs stats with minimal manual intervention.
 
 ---
 
